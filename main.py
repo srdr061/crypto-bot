@@ -1,42 +1,62 @@
 from flask import Flask, jsonify
-import requests
-import os
+from data_collector import DataCollector
+from pattern_recognition import PatternRecognition
+from news_analyzer import NewsAnalyzer
+from telegram_bot import TelegramBot
+import schedule
+import time
+import threading
 
 app = Flask(__name__)
+dc = DataCollector()
+pr = PatternRecognition()
+na = NewsAnalyzer()
+bot = TelegramBot()
 
-# Ana sayfa
-@app.route('/')
-def home():
-    return "Binance Service is running!"
-
-# Test endpoint'i - servisin çalışıp çalışmadığını kontrol eder
-@app.route('/test')
-def test():
-    return {"status": "ok", "message": "Test endpoint working"}
-
-# Tüm USDT çiftlerini getirir
-@app.route('/all-coins')
-def get_all_coins():
+def analyze_markets():
     try:
-        url = 'https://data-api.binance.vision/api/v3/ticker/price'
-        headers = {
-            'User-Agent': 'Mozilla/5.0',
-            'Accept': 'application/json'
-        }
-        response = requests.get(url, headers=headers)
-        data = response.json()
+        # Tüm USDT çiftlerini al
+        pairs = dc.get_all_pairs()
         
-        usdt_pairs = []
-        for coin in data:
-            if coin['symbol'].endswith('USDT'):
-                usdt_pairs.append({
-                    'symbol': coin['symbol'],
-                    'price': float(coin['price'])
-                })
-        return jsonify(usdt_pairs)
-        
+        for pair in pairs:
+            # Veri topla
+            df = dc.get_historical_data(pair, '4h')
+            df = dc.add_indicators(df)
+            
+            # Formasyonları kontrol et
+            patterns = pr.detect_patterns(df)
+            
+            # Haberleri analiz et
+            news_sentiment = na.analyze_sentiment(pair)
+            
+            # Sinyal kontrolü
+            if check_signals(df, patterns, news_sentiment):
+                signal_message = generate_signal_message(pair, df, patterns, news_sentiment)
+                bot.send_signal(signal_message)
+                
     except Exception as e:
-        return {"status": "error", "message": str(e)}
+        print(f"Error in market analysis: {str(e)}")
+
+def check_signals(df, patterns, sentiment):
+    # Sinyal mantığı
+    return True if (
+        df['RSI'].iloc[-1] < 30 or 
+        df['RSI'].iloc[-1] > 70 or 
+        any(patterns.values())
+    ) else False
+
+# Periyodik analiz
+schedule.every(15).minutes.do(analyze_markets)
+
+def run_schedule():
+    while True:
+        schedule.run_pending()
+        time.sleep(1)
 
 if __name__ == "__main__":
+    # Schedule thread'ini başlat
+    schedule_thread = threading.Thread(target=run_schedule)
+    schedule_thread.start()
+    
+    # Flask uygulamasını başlat
     app.run(host='0.0.0.0', port=int(os.environ.get('PORT', 8080)))
