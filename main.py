@@ -15,7 +15,6 @@ def test():
 @app.route('/top-coins')
 def get_top_coins():
     try:
-        # Binance'in resmi API endpoint'i
         url = 'https://api.binance.com/api/v3/ticker/price'
         headers = {
             'User-Agent': 'Mozilla/5.0',
@@ -24,17 +23,16 @@ def get_top_coins():
         response = requests.get(url, headers=headers)
         data = response.json()
         
-        usdt_pairs = []
-        for coin in data:
-            if coin['symbol'].endswith('USDT'):
-                usdt_pairs.append({
-                    'symbol': coin['symbol'],
-                    'price': float(coin['price'])
-                })
-        return jsonify(usdt_pairs[:10])
+        # Debug için veri yapısını kontrol edelim
+        return jsonify({
+            "status": "success",
+            "raw_data": data,
+            "type": str(type(data)),
+            "length": len(data) if isinstance(data, (list, dict)) else 0
+        })
         
     except Exception as e:
-        return {"status": "error", "message": str(e)}
+        return {"status": "error", "message": str(e), "type": str(type(e))}
 
 if __name__ == "__main__":
     app.run(host='0.0.0.0', port=int(os.environ.get('PORT', 8080)))
