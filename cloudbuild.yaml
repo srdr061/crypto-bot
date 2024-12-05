@@ -2,6 +2,6 @@ options:
   logging: CLOUD_LOGGING_ONLY
 steps:
   - name: 'gcr.io/cloud-builders/docker'
-    args: ['build', '-t', '${_REGION}-docker.pkg.dev/${PROJECT_ID}/crypto-bot-repo/binance-service:latest', '.']
+    args: ['build', '-t', 'europe-west1-docker.pkg.dev/srdr-cimpuls/crypto-bot-repo/binance-service:latest', '.']
   - name: 'gcr.io/cloud-builders/docker'
-    args: ['push', '${_REGION}-docker.pkg.dev/${PROJECT_ID}/crypto-bot-repo/binance-service:latest']
+    args: ['push', 'europe-west1-docker.pkg.dev/srdr-cimpuls/crypto-bot-repo/binance-service:latest']
