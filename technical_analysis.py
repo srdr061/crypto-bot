@@ -48,9 +48,9 @@ class TechnicalAnalysis:
         }
 
     def calculate_bollinger(self, df):
-        bb = df.ta.bbands()
-        return {
-            'upper': float(bb['BBU_20_2.0'].iloc[-1]),
-            'middle': float(bb['BBM_20_2.0'].iloc[-1]),
-            'lower': float(bb['BBL_20_2.0'].iloc[-1])
-        }
+    bb = df.ta.bbands()
+    return {
+        'upper': float(bb['BBU_5_2.0'].iloc[-1]),
+        'middle': float(bb['BBM_5_2.0'].iloc[-1]),
+        'lower': float(bb['BBL_5_2.0'].iloc[-1])
+    }
