@@ -15,21 +15,24 @@ def test():
 @app.route('/top-coins')
 def get_top_coins():
     try:
-        url = 'https://api1.binance.com/api/v3/ticker/price'
-        response = requests.get(url)
+        # Binance'in resmi API endpoint'i
+        url = 'https://api.binance.com/api/v3/ticker/price'
+        headers = {
+            'User-Agent': 'Mozilla/5.0',
+            'Accept': 'application/json'
+        }
+        response = requests.get(url, headers=headers)
         data = response.json()
         
-        if response.status_code == 200:
-            usdt_pairs = []
-            for coin in data:
-                if isinstance(coin, dict) and coin['symbol'].endswith('USDT'):
-                    usdt_pairs.append({
-                        'symbol': coin['symbol'],
-                        'price': float(coin['price'])
-                    })
-            return jsonify(usdt_pairs[:10])
+        usdt_pairs = []
+        for coin in data:
+            if coin['symbol'].endswith('USDT'):
+                usdt_pairs.append({
+                    'symbol': coin['symbol'],
+                    'price': float(coin['price'])
+                })
+        return jsonify(usdt_pairs[:10])
         
-        return {"status": "error", "message": "API request failed"}
     except Exception as e:
         return {"status": "error", "message": str(e)}
 
