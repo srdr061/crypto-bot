@@ -1,5 +1,6 @@
-import numpy as np
-import talib
+import pandas as pd
+import pandas_ta as ta
+import requests
 
 class TechnicalAnalysis:
     def __init__(self):
@@ -10,15 +11,7 @@ class TechnicalAnalysis:
             '1d': '1d'
         }
 
-    def analyze_all_timeframes(self, symbol):
-        results = {}
-        for tf_name, tf_code in self.timeframes.items():
-            klines = self.get_klines(symbol, tf_code, limit=100)
-            results[tf_name] = self.calculate_indicators(klines)
-        return results
-
     def get_klines(self, symbol, interval, limit=100):
-        import requests
         url = 'https://data-api.binance.vision/api/v3/klines'
         params = {
             'symbol': symbol,
@@ -28,34 +21,36 @@ class TechnicalAnalysis:
         response = requests.get(url, params=params)
         return response.json()
 
+    def analyze_all_timeframes(self, symbol):
+        results = {}
+        for tf_name, tf_code in self.timeframes.items():
+            klines = self.get_klines(symbol, tf_code)
+            results[tf_name] = self.calculate_indicators(klines)
+        return results
+
     def calculate_indicators(self, klines_data):
-        close_prices = np.array([float(k[4]) for k in klines_data])
-        high_prices = np.array([float(k[2]) for k in klines_data])
-        low_prices = np.array([float(k[3]) for k in klines_data])
-        
+        df = pd.DataFrame(klines_data, columns=['timestamp', 'open', 'high', 'low', 'close', 'volume', 'close_time', 'quote_volume', 'trades', 'taker_buy_base', 'taker_buy_quote', 'ignored'])
+        df = df.astype({'close': 'float', 'high': 'float', 'low': 'float', 'volume': 'float'})
+
         return {
-            'rsi': self.calculate_rsi(close_prices),
-            'macd': self.calculate_macd(close_prices),
-            'bollinger': self.calculate_bollinger(close_prices),
-            'volume': float(klines_data[-1][5])
+            'rsi': float(df.ta.rsi().iloc[-1]),
+            'macd': self.calculate_macd(df),
+            'bollinger': self.calculate_bollinger(df),
+            'volume': float(df['volume'].iloc[-1])
         }
 
-    def calculate_rsi(self, prices):
-        rsi = talib.RSI(prices)
-        return float(rsi[-1])
-    
-    def calculate_macd(self, prices):
-        macd, signal, hist = talib.MACD(prices)
+    def calculate_macd(self, df):
+        macd = df.ta.macd()
         return {
-            'macd': float(macd[-1]),
-            'signal': float(signal[-1]),
-            'histogram': float(hist[-1])
+            'macd': float(macd['MACD_12_26_9'].iloc[-1]),
+            'signal': float(macd['MACDs_12_26_9'].iloc[-1]),
+            'histogram': float(macd['MACDh_12_26_9'].iloc[-1])
         }
-    
-    def calculate_bollinger(self, prices):
-        upper, middle, lower = talib.BBANDS(prices)
+
+    def calculate_bollinger(self, df):
+        bb = df.ta.bbands()
         return {
-            'upper': float(upper[-1]),
-            'middle': float(middle[-1]),
-            'lower': float(lower[-1])
+            'upper': float(bb['BBU_20_2.0'].iloc[-1]),
+            'middle': float(bb['BBM_20_2.0'].iloc[-1]),
+            'lower': float(bb['BBL_20_2.0'].iloc[-1])
         }
