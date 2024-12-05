@@ -1,9 +1,8 @@
 from flask import Flask, jsonify
-from binance.client import Client
+import requests
 import os
 
 app = Flask(__name__)
-client = Client(None, None)
 
 @app.route('/')
 def home():
@@ -16,9 +15,10 @@ def test():
 @app.route('/top-coins')
 def get_top_coins():
     try:
-        tickers = client.get_ticker()
-        usdt_pairs = [t for t in tickers if t['symbol'].endswith('USDT')]
-        return jsonify(usdt_pairs[:3])  # İlk 3 coin'i döndür
+        response = requests.get('https://api.binance.com/api/v3/ticker/24hr')
+        data = response.json()
+        usdt_pairs = [t for t in data if t['symbol'].endswith('USDT')]
+        return jsonify(usdt_pairs[:3])
     except Exception as e:
         return {"status": "error", "message": str(e)}
 
