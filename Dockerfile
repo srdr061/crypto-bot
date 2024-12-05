@@ -7,11 +7,6 @@ RUN pip install --no-cache-dir -r requirements.txt
 
 COPY . .
 
-ENV PORT 8080
-EXPOSE 8080
+ENV PORT=8080
 
-# Health check için startup süresini artır
-ENV GUNICORN_TIMEOUT=3600
-ENV WORKERS=8
-
-CMD exec gunicorn --bind :$PORT --workers $WORKERS --timeout $GUNICORN_TIMEOUT main:app
+CMD exec gunicorn --bind :$PORT --workers=4 --threads=2 --timeout=0 main:app
