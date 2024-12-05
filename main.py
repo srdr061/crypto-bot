@@ -8,14 +8,9 @@ app = Flask(__name__)
 def home():
     return "Binance Service is running!"
 
-@app.route('/test')
-def test():
-    return {"status": "ok", "message": "Test endpoint working"}
-
-@app.route('/top-coins')
-def get_top_coins():
+@app.route('/all-coins')
+def get_all_coins():
     try:
-        # Binance Spot Market API
         url = 'https://data-api.binance.vision/api/v3/ticker/price'
         headers = {
             'User-Agent': 'Mozilla/5.0',
@@ -31,7 +26,7 @@ def get_top_coins():
                     'symbol': coin['symbol'],
                     'price': float(coin['price'])
                 })
-        return jsonify(usdt_pairs[:10])
+        return jsonify(usdt_pairs)  # Tüm USDT çiftlerini döndür
         
     except Exception as e:
         return {"status": "error", "message": str(e)}
