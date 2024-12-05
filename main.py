@@ -3,8 +3,7 @@ import requests
 from technical_analysis import TechnicalAnalysis
 import concurrent.futures
 
-app = Flask(__name__)
-ta = TechnicalAnalysis()
+from flask import Flask, jsonify, request  # request ekledik
 
 @app.route('/top-coins')
 def get_top_coins():
@@ -19,9 +18,11 @@ def get_top_coins():
             reverse=True
         )[:50]
         
-        return jsonify({
-            'coins': [{'symbol': p['symbol'], 'volume': p['volume']} for p in sorted_pairs]
-        })
+        # Dict yerine list kullanıyoruz
+        return jsonify([{
+            'symbol': p['symbol'],
+            'volume': float(p['volume'])
+        } for p in sorted_pairs])
     except Exception as e:
         return {"status": "error", "message": str(e)}
 
