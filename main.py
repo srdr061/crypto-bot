@@ -1,10 +1,11 @@
-from flask import Flask, jsonify, cache
+from flask import Flask, jsonify
 import requests
 import os
 from datetime import datetime, timedelta
 import concurrent.futures
 
 app = Flask(__name__)
+
 
 # Cache süresi: 1 dakika
 CACHE_DURATION = 60
