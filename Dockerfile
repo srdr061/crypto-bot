@@ -10,4 +10,7 @@ COPY . .
 ENV PORT 8080
 EXPOSE 8080
 
-CMD exec gunicorn --workers 8 --timeout 3600 main:app
+# Startup probe için bekleme süresi
+ENV GUNICORN_CMD_ARGS="--timeout 3600 --workers 8 --preload"
+
+CMD exec gunicorn main:app
