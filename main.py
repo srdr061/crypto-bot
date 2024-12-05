@@ -1,11 +1,12 @@
+from flask import Flask
 from binance.client import Client
 import time
 
-def main():
-    print("Binance Service Started")
-    while True:
-        print("Service running...")
-        time.sleep(60)
+app = Flask(__name__)
+
+@app.route('/')
+def home():
+    return "Binance Service is running!"
 
 if __name__ == "__main__":
-    main()
+    app.run(host='0.0.0.0', port=8080)
