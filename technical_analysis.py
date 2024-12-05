@@ -39,3 +39,23 @@ class TechnicalAnalysis:
             'bollinger': self.calculate_bollinger(close_prices),
             'volume': float(klines_data[-1][5])
         }
+
+    def calculate_rsi(self, prices):
+        rsi = talib.RSI(prices)
+        return float(rsi[-1])
+    
+    def calculate_macd(self, prices):
+        macd, signal, hist = talib.MACD(prices)
+        return {
+            'macd': float(macd[-1]),
+            'signal': float(signal[-1]),
+            'histogram': float(hist[-1])
+        }
+    
+    def calculate_bollinger(self, prices):
+        upper, middle, lower = talib.BBANDS(prices)
+        return {
+            'upper': float(upper[-1]),
+            'middle': float(middle[-1]),
+            'lower': float(lower[-1])
+        }
