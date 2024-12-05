@@ -13,19 +13,10 @@ def get_technical_analysis():
         
         for symbol in symbols:
             if symbol['symbol'].endswith('USDT'):
-                klines = requests.get(
-                    'https://data-api.binance.vision/api/v3/klines',
-                    params={
-                        'symbol': symbol['symbol'],
-                        'interval': '4h',
-                        'limit': 100
-                    }
-                ).json()
-                
                 base_symbol = symbol['symbol'].replace('USDT', '')
                 analysis_results[base_symbol] = {
                     'current_price': float(symbol['price']),
-                    'indicators': ta.calculate_indicators(klines)
+                    'timeframes': ta.analyze_all_timeframes(symbol['symbol'])
                 }
         
         return jsonify(analysis_results)
