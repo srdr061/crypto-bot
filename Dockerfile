@@ -19,4 +19,4 @@ COPY . .
 ENV PORT 8080
 EXPOSE 8080
 
-CMD exec gunicorn --workers 1 --timeout 300 main:app
+CMD exec gunicorn --workers 1 --timeout 600 main:app
