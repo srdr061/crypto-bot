@@ -4,10 +4,17 @@ import os
 
 app = Flask(__name__)
 
+# Ana sayfa
 @app.route('/')
 def home():
     return "Binance Service is running!"
 
+# Test endpoint'i - servisin çalışıp çalışmadığını kontrol eder
+@app.route('/test')
+def test():
+    return {"status": "ok", "message": "Test endpoint working"}
+
+# Tüm USDT çiftlerini getirir
 @app.route('/all-coins')
 def get_all_coins():
     try:
@@ -26,7 +33,7 @@ def get_all_coins():
                     'symbol': coin['symbol'],
                     'price': float(coin['price'])
                 })
-        return jsonify(usdt_pairs)  # Tüm USDT çiftlerini döndür
+        return jsonify(usdt_pairs)
         
     except Exception as e:
         return {"status": "error", "message": str(e)}
