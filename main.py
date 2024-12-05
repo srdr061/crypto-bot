@@ -16,9 +16,20 @@ def test():
 def get_top_coins():
     try:
         response = requests.get('https://api.binance.com/api/v3/ticker/24hr')
-        data = response.json()
-        usdt_pairs = [t for t in data if t['symbol'].endswith('USDT')]
-        return jsonify(usdt_pairs[:3])
+        if response.status_code == 200:
+            data = response.json()
+            usdt_pairs = []
+            for coin in data:
+                if coin['symbol'].endswith('USDT'):
+                    usdt_pairs.append({
+                        'symbol': coin['symbol'],
+                        'price': coin['lastPrice'],
+                        'change_24h': coin['priceChangePercent'],
+                        'volume': coin['volume']
+                    })
+            return jsonify(usdt_pairs[:10])  # İlk 10 coin
+        else:
+            return {"status": "error", "message": "API error"}
     except Exception as e:
         return {"status": "error", "message": str(e)}
 
