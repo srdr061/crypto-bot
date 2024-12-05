@@ -15,11 +15,10 @@ def test():
 @app.route('/top-coins')
 def get_top_coins():
     try:
-        # Binance API'den sembol fiyatlarını al
-        response = requests.get('https://api.binance.com/api/v3/ticker/price')
+        url = 'https://api1.binance.com/api/v3/ticker/price'
+        response = requests.get(url)
         if response.status_code == 200:
             data = response.json()
-            # Sadece USDT çiftlerini filtrele
             usdt_pairs = []
             for coin in data:
                 if isinstance(coin, dict) and coin['symbol'].endswith('USDT'):
@@ -27,7 +26,6 @@ def get_top_coins():
                         'symbol': coin['symbol'],
                         'price': float(coin['price'])
                     })
-            # İlk 10 coini döndür
             return jsonify(usdt_pairs[:10])
         return {"status": "success", "data": data}
     except Exception as e:
