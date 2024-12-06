@@ -1,4 +1,4 @@
-from flask import Flask
+from flask import Flask, jsonify
 import requests
 
 app = Flask(__name__)
@@ -13,16 +13,21 @@ def get_top_coins():
         ticker_url = 'https://api.binance.com/api/v3/ticker/24hr'
         tickers = requests.get(ticker_url).json()
         
-        usdt_pairs = [t for t in tickers if t['symbol'].endswith('USDT')]
-        sorted_pairs = sorted(
-            usdt_pairs,
-            key=lambda x: float(x['volume']),
-            reverse=True
-        )[:50]
+        # Dict yerine list kullanıyoruz
+        usdt_pairs = []
+        for ticker in tickers:
+            if isinstance(ticker, dict) and ticker.get('symbol', '').endswith('USDT'):
+                usdt_pairs.append({
+                    'symbol': ticker['symbol'],
+                    'volume': float(ticker['volume'])
+                })
         
-        return [{'symbol': p['symbol'], 'volume': float(p['volume'])} for p in sorted_pairs]
+        # Hacme göre sırala
+        sorted_pairs = sorted(usdt_pairs, key=lambda x: x['volume'], reverse=True)[:50]
+        return jsonify(sorted_pairs)
+        
     except Exception as e:
-        return {"status": "error", "message": str(e)}
+        return jsonify({"status": "error", "message": str(e)})
 
 if __name__ == "__main__":
     app.run(host='0.0.0.0', port=8080)
