@@ -10,29 +10,23 @@ def hello():
 @app.route('/top-coins')
 def get_top_coins():
     try:
-        # Debug için print ekleyelim
-        print("Fetching data from Binance...")
-        
-        response = requests.get('https://api.binance.com/api/v3/ticker/24hr')
-        print(f"Response status: {response.status_code}")
-        
+        # Using the correct Binance API endpoint we used before
+        ticker_url = 'https://data-api.binance.vision/api/v3/ticker/price'
+        response = requests.get(ticker_url)
         tickers = response.json()
-        print(f"Total tickers: {len(tickers)}")
         
         usdt_pairs = []
         for ticker in tickers:
             if ticker['symbol'].endswith('USDT'):
                 usdt_pairs.append({
                     'symbol': ticker['symbol'],
-                    'volume': float(ticker['quoteVolume'])  # quoteVolume kullanıyoruz
+                    'price': float(ticker['price'])
                 })
         
-        print(f"USDT pairs found: {len(usdt_pairs)}")
-        sorted_pairs = sorted(usdt_pairs, key=lambda x: x['volume'], reverse=True)[:50]
-        
+        sorted_pairs = sorted(usdt_pairs, key=lambda x: x['price'], reverse=True)[:50]
         return jsonify(sorted_pairs)
+        
     except Exception as e:
-        print(f"Error: {str(e)}")
         return jsonify({"status": "error", "message": str(e)})
 
 if __name__ == "__main__":
